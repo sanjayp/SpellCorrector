@@ -12,25 +12,29 @@
 #include <string>
 #include <vector>
 #include <unordered_set>
+#include <set>
 #include <iostream>
 #include <fstream>
+#include <boost/algorithm/string.hpp>
+
+#define MAX_CORRECTIONS 20
 
 using namespace std;
+using namespace boost;
 
 typedef unordered_set<string> table;
-typedef vector<string> list;
+typedef vector<string> lst;
 
 class SpellingManager {
+    public:
+        table initializeDictionary(string fileLoc);
+        bool isValidWord(string word) const;
+        lst getCorrections(string word) const;
+
     private:
         table dictionary;
-        list generateEdits1(string word);
-        list generateEdits2(list edits1);
-        table initializeDictionary(string fileLoc);
-
-    public:
-        bool isValidWord(string word) const;
-        list getCorrections(string word) const;
-
+        lst letters;
+        pair<lst,set<string>> generateEdits(string word, bool return_edits) const;
 };
 
 #endif

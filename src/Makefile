@@ -1,8 +1,8 @@
 PROGRAM = spell_corrector_test
-UNITS = spelling_manager
+UNITS = spelling_manager spell_corrector_test
 
 spelling_manager.o: spelling_manager.h
-spell_corrector_test.o: spell_corrector_test.cpp
+spell_corrector_test.o: spelling_manager.h
 
 CC = clang++
 CFLAGS = -g -Wall -std=c++0x

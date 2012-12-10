@@ -11,7 +11,7 @@ for line in input:
     wordlist = []
     for line2 in file:
         wordlist.append(line2.strip().rstrip('\n'))
-    dict = list(set(sorted(dict + wordlist)))
+    dict = sorted(list(set(dict + wordlist)))
 
 for word in dict:
     output.write(word+'\n')
