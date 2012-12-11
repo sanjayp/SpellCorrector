@@ -10,60 +10,67 @@
 
 using namespace std;
 
-table SpellingManager::initializeDictionary(string fileLoc) {
+void SpellingManager::initializeDictionary(string fileLoc) {
+   // Prepare dictionary file for reading
    ifstream stream;
    stream.open(fileLoc.c_str()); 
-
    if (!stream || !stream.is_open()) {
        cerr << "Invalid dictionary file location." << endl;
        exit(-1);
    }
    
+   // Generate dictionary
    string word;
    while (stream >> word) {
+    to_lower(word);
     dictionary.insert(word); 
    }
 
-    // Generate lowercase letters as strings
-    for (int i = 0; i < 26; i++) {
-        string letter;
-        letter.push_back((char)(i+97));
-        letters.push_back(letter);
-    }
-
-    return dictionary;
+   // Generate lowercase letter list
+   for (int i = 0; i < 26; i++) {
+    string letter;
+    letter.push_back((char)(i+97));
+    letters.push_back(letter);
+   }
 }
 
 bool SpellingManager::isValidWord(string word) const{
     string temp(word);
+    // Trim out non-alphanumeric characters from edges
     trim_if(temp,!(is_from_range('a','z') || is_from_range('A','Z') || is_digit()));
-    // Accounts for words at start of sentences. Consider removing
-    // to its own method.
-    string lower(temp);
-    lower[0] = tolower(temp[0]);
-    return dictionary.count(temp) + dictionary.count(lower) > 0;
+    // Lowercase the word
+    to_lower(temp);
+    return dictionary.count(temp);
 }
 
 lst SpellingManager::getCorrections(string word) const{
-    // Generate edit distance 1 on word and check validity
+    lst output;
+
+    // Generate valid edit distance 1 words
     pair<lst,set<string>> result = generateEdits(word, 1);
     set<string> corrections = result.second;
+    set<string>::iterator it;
+    for (it=corrections.begin();it!=corrections.end();it++) {
+        output.push_back(*it);
+    }
+
+    // Generate valid edit distance 2 words
     lst edits1 = result.first;
     for (int i = 0; i < edits1.size(); i++) {
         pair<lst,set<string>> tmp = generateEdits(edits1[i],0);
-        set<string> tmpset = tmp.second;
-        set<string>::iterator it;
-        for (it=tmpset.begin();it!=tmpset.end();it++) {
-            corrections.insert(*it);
+        for (it=tmp.second.begin();it!=tmp.second.end();it++) {
+            if (corrections.insert(*it).second) {
+                output.push_back(*it);
+            }
         }
     }
 
-    lst output(corrections.begin(),corrections.end());
-    //cout << word << ": "; 
-    for (int i = 0; i < output.size(); i++) {
-      //  cout << output[i] << ", ";
-    }
-    //cout << endl;
+    //cout << word << " : "; 
+    //for (int i = 0; i < output.size(); i++) {
+       // cout << output[i] << ", ";
+    //}
+    //cout << endl << endl;
+
     return output;
 }
 
@@ -77,13 +84,8 @@ pair<lst,set<string>> SpellingManager::generateEdits(string word, bool return_ed
         modified.erase(i,1);
         if (return_edits)
             edits.push_back(modified);
-        if (dictionary.count(modified)){
+        if (isValidWord(modified)){
             corrections.insert(modified);
-            //cout << word << " " << modified << endl;
-        }
-        // short-circuit if finished early
-        if (corrections.size() >= MAX_CORRECTIONS) {
-            break;
         }
     }
 
@@ -94,14 +96,9 @@ pair<lst,set<string>> SpellingManager::generateEdits(string word, bool return_ed
             modified.replace(i,1,letters[j]);
             if (return_edits)
                 edits.push_back(modified);
-            if (dictionary.count(modified)) {
+            if (isValidWord(modified)) {
                 corrections.insert(modified);
-                //cout << modified << endl;
             }
-        }
-        // short-circuit if finished early
-        if (corrections.size() >= MAX_CORRECTIONS) {
-            break;
         }
     }
 
@@ -112,14 +109,9 @@ pair<lst,set<string>> SpellingManager::generateEdits(string word, bool return_ed
             modified.insert(i,letters[j]);
             if (return_edits)
                 edits.push_back(modified);
-            if (dictionary.count(modified)) {
+            if (isValidWord(modified)) {
                 corrections.insert(modified);
-                //cout << modified << endl;
             }
-        }
-        // short-circuit if finished early
-        if (corrections.size() >= MAX_CORRECTIONS) {
-            break;
         }
     }
 
@@ -131,11 +123,13 @@ pair<lst,set<string>> SpellingManager::generateEdits(string word, bool return_ed
         modified.replace(i,1,before);
         if (return_edits)
             edits.push_back(modified);
-        if (dictionary.count(modified) && modified.compare(word)) {
+        if (isValidWord(modified)) {
             corrections.insert(modified);
-            //cout << word << " " << modified << endl;
         }
     }
+
+    if (corrections.count(word)>0)
+        corrections.erase(word);
 
     pair <lst, set<string>> result (edits,corrections);
     return result;

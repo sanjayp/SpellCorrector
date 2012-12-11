@@ -17,8 +17,6 @@
 #include <fstream>
 #include <boost/algorithm/string.hpp>
 
-#define MAX_CORRECTIONS 20
-
 using namespace std;
 using namespace boost;
 
@@ -27,8 +25,13 @@ typedef vector<string> lst;
 
 class SpellingManager {
     public:
-        table initializeDictionary(string fileLoc);
+        // Initializes the dictionary from persistent dictionary file.
+        void initializeDictionary(string fileLoc);
+        // Checks validity of a word. NOTE: handles trimming and
+        // camel-case option for all checks
         bool isValidWord(string word) const;
+        // Produces list of possible corrections for the provided word
+        // (up to MAX_CORRECTIONS in total).
         lst getCorrections(string word) const;
 
     private:
