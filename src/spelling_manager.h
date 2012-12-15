@@ -15,10 +15,11 @@
 #include <set>
 #include <iostream>
 #include <fstream>
-#include <boost/algorithm/string.hpp>
+#include <algorithm>
+//#include <boost/algorithm/string.hpp>
 
 using namespace std;
-using namespace boost;
+//using namespace boost;
 
 typedef unordered_set<string> table;
 typedef vector<string> lst;
@@ -37,6 +38,7 @@ class SpellingManager {
     private:
         table dictionary;
         lst letters;
+        string delimiter;
         pair<lst,set<string>> generateEdits(string word, bool return_edits) const;
 };
 

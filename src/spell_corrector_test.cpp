@@ -22,6 +22,9 @@
 #include "spelling_manager.h"
 #include <sstream>
 #include <ctime>
+#include <boost/algorithm/string.hpp>
+
+using namespace boost;
 
 string root_path; // root prefix path of project
 
@@ -121,7 +124,7 @@ void testCorrectorOnBenchmark(SpellingManager* mgr, string filename) {
             trim(check);
             time_t start_correct = time(0);
             lst suggested = mgr->getCorrections(check);
-            correction_time+ = time(0) - start_correct; 
+            correction_time += time(0) - start_correct; 
             if (find(suggested.begin(),suggested.end(),correct)!=suggested.end()) {
                 corrected_count++;
             } else {

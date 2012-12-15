@@ -22,7 +22,8 @@ void SpellingManager::initializeDictionary(string fileLoc) {
    // Generate dictionary
    string word;
    while (stream >> word) {
-    to_lower(word);
+    transform(word.begin(),word.end(),word.begin(),::tolower);
+    //to_lower(word);
     dictionary.insert(word); 
    }
 
@@ -32,14 +33,32 @@ void SpellingManager::initializeDictionary(string fileLoc) {
     letter.push_back((char)(i+97));
     letters.push_back(letter);
    }
+
+   // Construct the delimiter
+    string lower = "abcdefghijklmnopqrstuvwxyz";
+    string upper(lower);
+    transform(lower.begin(),lower.end(),lower.begin(),::toupper);
+    string digits = "0123456789";
+    delimiter.append(lower);
+    delimiter.append(upper);
+    delimiter.append(digits);
 }
 
 bool SpellingManager::isValidWord(string word) const{
     string temp(word);
     // Trim out non-alphanumeric characters from edges
-    trim_if(temp,!(is_from_range('a','z') || is_from_range('A','Z') || is_digit()));
-    // Lowercase the word
-    to_lower(temp);
+    //trim_if(temp,!(is_from_range('a','z') || is_from_range('A','Z') || is_digit()));
+
+    if (temp.find_first_not_of(delimiter)!=string::npos) {
+        // right trim
+        temp = temp.substr( 0, temp.find_last_of(delimiter) + 1 );
+        if (temp.find_first_not_of(delimiter)!=string::npos)
+            // left trim
+            temp = temp.substr(temp.find_last_of(delimiter));
+    }
+    // lowercase
+    transform(temp.begin(),temp.end(),temp.begin(),::tolower);
+
     return dictionary.count(temp);
 }
 
